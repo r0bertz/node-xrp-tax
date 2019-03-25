@@ -1,6 +1,5 @@
 const dateformat = require('dateformat');
 
-// Date,Source,Action,Symbol,Volume,Currency,Price,Fee,FeeCurrency
 class Line {
   constructor(
     date, source, action, symbol, volume, currency, price, fee, feeCurrency) {
@@ -13,6 +12,10 @@ class Line {
     this.price = price;
     this.fee = fee;
     this.feeCurrency = feeCurrency;
+  }
+
+  static header() {
+    return 'Date,Source,Action,Symbol,Volume,Currency,Price,Fee,FeeCurrency';
   }
 
   toString() {

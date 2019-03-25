@@ -129,17 +129,7 @@ lines.sort(function(a, b) {
   return a.date - b.date;
 });
 
-console.log(
-  'Date,' +
-  'Source,' +
-  'Action,' +
-  'Symbol,' +
-  'Volume,' +
-  'Currency,' +
-  'Price,' +
-  'Fee,' +
-  'FeeCurrency'
-);
+console.log(Line.header());
 
 lines.forEach(function(l) {
   console.log(l.toString());
