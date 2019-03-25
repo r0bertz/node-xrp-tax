@@ -35,7 +35,7 @@ api.connect().then(() => {
     'excludeFailures': true,
     'earliestFirst': true,
   }).then(response => {
-    fs.writeFile(argv.output, JSON.stringify(response, null, 2), function(err) {
+    return fs.writeFile(argv.output, JSON.stringify(response, null, 2), function(err) {
       if(err) {
         return console.log(err);
       }
