@@ -13,13 +13,18 @@ const argv = require('yargs')
 
 promises = []
 
+function isMarketPriceHint(source) {
+  let hint = source.split(':')[0];
+  return hint === 'Gift' || hint === 'Self';
+}
+
 fs.createReadStream(argv.input)
   .pipe(csv.parse({columns: true}))
   .on('data', (row) => {
     if (row === null) {
       return;
     }
-    if (row.Source === 'Gift') {
+    if (isMarketPriceHint(row.Source)) {
       let d = row.Date
       p = fetch('https://data.ripple.com/v2/exchange_rates/XRP/USD+rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B/?date=' + d)
         .then(res => res.json())
@@ -35,7 +40,7 @@ fs.createReadStream(argv.input)
       fs.createReadStream(argv.input)
         .pipe(csv.parse({columns: true}))
         .pipe(csv.transform(function(row) {
-          if (row.Source === 'Gift') {
+          if (isMarketPriceHint(row.Source)) {
             row.Price = m.get(row.Date);
           }
           return row;
