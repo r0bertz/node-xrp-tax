@@ -48,7 +48,7 @@ function getFundSource(action, address) {
   var name = addresses[address];
   if (action === 'Receive' && typeof hints !== 'undefined' &&
     hints.hasOwnProperty(name)) {
-    return hints[name];
+    return hints[name] + ':' + name;
   }
   return name;
 }
