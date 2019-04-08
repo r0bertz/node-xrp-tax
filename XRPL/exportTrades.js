@@ -1,6 +1,8 @@
+// Exports transactions that receive, send or trade 'symbol'.
+const symbol = 'XRP'
 const BigNumber = require('bignumber.js');
 const fs = require('fs');
-const Line = require('./line.js');
+const Line = require('../line.js');
 
 const argv = require('yargs')
   .option('account', {
@@ -39,7 +41,6 @@ if (typeof argv.cost_basis_hint !== 'undefined') {
   var hints = JSON.parse(fs.readFileSync(argv.cost_basis_hint, 'utf8'));
 }
 
-var symbol = 'XRP'
 
 function getFundSource(action, address) {
   if (typeof argv.addresses === 'undefined') {
