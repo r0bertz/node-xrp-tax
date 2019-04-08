@@ -29,12 +29,17 @@ class Line {
     if (!action) {
       if (source.match(/[Dd]eposit/)) {
         action = 'Receive'
-      } else if (source.match(/[Ww]ithdraw/)) {
+      } else if (source.match(/[Ww]ithdraw/) ||
+                 source.match(/[Pp]ayment/)) {
         action = 'Send'
       }
     }
     var volume, symbol;
     [volume, symbol] = row.Amount.split(' ');
+    // TODO(r0bertz): support other currencies.
+    if (symbol !== 'XRP') {
+      return;
+    }
     var totalPrice, currency;
     [totalPrice, currency] = row.Value.split(' ');
     var fee = 0, feeCurrency = 'USD';

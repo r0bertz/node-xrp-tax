@@ -16,6 +16,10 @@ fs.createReadStream(argv.input)
     if (row === null) {
       return;
     }
-    return Line.fromBitstamp(row).toString() + "\n";
+    line = Line.fromBitstamp(row)
+    if (!line) {
+      return;
+    }
+    return line.toString() + "\n";
   }))
   .pipe(process.stdout);
