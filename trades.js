@@ -62,6 +62,7 @@ transactions.forEach(function(tx) {
       return;
     }
     var balances = tx.outcome.balanceChanges[argv.account]
+    // currency to value.
     var cv = {};
     balances.forEach(function(b) {
       // Same currency can appear twice in balances.
@@ -71,10 +72,13 @@ transactions.forEach(function(tx) {
         cv[b.currency] = BigNumber(b.value);
       }
     });
-    // XRP balance change is the same as fee, remove it from cv.
-    if (cv.hasOwnProperty('XRP') &&
-        BigNumber(tx.outcome.fee).plus(BigNumber(cv.XRP)).isEqualTo(0)) {
-      delete cv.XRP;
+    // Ignore fee, since some fees (fee of transactions that doesn't trade XRP)
+    // are ignored anyway.
+    if (cv.hasOwnProperty('XRP') && tx.address === argv.account) {
+      cv.XRP = cv.XRP.plus(BigNumber(tx.outcome.fee))
+      if (cv.XRP.eq(0)) {
+        delete cv.XRP;
+      }
     }
     var currencies = Object.keys(cv)
     if (currencies.length > 2) {
@@ -85,6 +89,7 @@ transactions.forEach(function(tx) {
     }
     var source = 'XRPL';
     var action;
+    // Use USD as default currency.
     var currency = 'USD';
     var price = undefined;
     if (currencies.length === 1) {
@@ -104,8 +109,8 @@ transactions.forEach(function(tx) {
       }
       currencies.forEach(function(c) {
         if (c !== symbol) {
-          currency = c;
-          price = cv[currency].dividedBy(cv[symbol]).negated();
+          currency = c
+          price = cv[c].dividedBy(cv[symbol]).negated();
         }
       });
     }
@@ -120,7 +125,7 @@ transactions.forEach(function(tx) {
       cv[symbol],
       currency,
       price,
-      '0',  // Fee. XRP balance change includes fee.
+      '0',  // Fee. Ignore it.
       'XRP'))
   }
 });
