@@ -42,14 +42,22 @@ if (typeof argv.cost_basis_hint !== 'undefined') {
 }
 
 
-function getFundSource(action, address) {
+function getFundSource(action, timestamp, address) {
   if (typeof argv.addresses === 'undefined') {
     return '';
   }
+  if (typeof argv.cost_basis_hint === 'undefined') {
+    return '';
+  }
   var name = addresses[address];
-  if (action === 'Receive' && typeof hints !== 'undefined' &&
-    hints.hasOwnProperty(name)) {
-    return hints[name] + ':' + name;
+  var nameDate = name + ':' + (new Date(timestamp)).toISOString();
+  if (action === 'Receive') {
+    if (hints.hasOwnProperty(nameDate)) {
+      return hints[nameDate] + ':' + name;
+    }
+    if (hints.hasOwnProperty(name)) {
+      return hints[name] + ':' + name;
+    }
   }
   return name;
 }
@@ -99,7 +107,8 @@ transactions.forEach(function(tx) {
       } else {
         action = 'Send';
       }
-      source = getFundSource(action, action === 'Receive' ?
+      source = getFundSource(action, tx.outcome.timestamp,
+        action === 'Receive' ?
         tx.specification.source.address :
         tx.specification.destination.address)
     } else {  // currencies.length === 2
