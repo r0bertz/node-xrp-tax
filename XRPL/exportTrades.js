@@ -46,12 +46,9 @@ function getFundSource(action, timestamp, address) {
   if (typeof argv.addresses === 'undefined') {
     return '';
   }
-  if (typeof argv.cost_basis_hint === 'undefined') {
-    return '';
-  }
   var name = addresses[address];
   var nameDate = name + ':' + (new Date(timestamp)).toISOString();
-  if (action === 'Receive') {
+  if (action === 'RECEIVE' && typeof argv.cost_basis_hint !== 'undefined') {
     if (hints.hasOwnProperty(nameDate)) {
       return hints[nameDate] + ':' + name;
     }
@@ -64,80 +61,65 @@ function getFundSource(action, timestamp, address) {
 
 var lines = []
 
-transactions.forEach(function(tx) {
-  if (tx.type === 'payment' || tx.type === 'order') {
-    if (!tx.outcome.balanceChanges.hasOwnProperty(argv.account)) {
-      // This happens when unfunded order of 'account' is cancelled.
-      return;
-    }
-    var balances = tx.outcome.balanceChanges[argv.account]
-    // currency to value.
-    var cv = {};
-    balances.forEach(function(b) {
-      // Same currency can appear twice in balances.
-      if (cv.hasOwnProperty(b.currency)) {
-        cv[b.currency] = cv[b.currency].plus(BigNumber(b.value));
-      } else {
-        cv[b.currency] = BigNumber(b.value);
-      }
-    });
-    // Ignore fee, since some fees (fee of transactions that doesn't trade XRP)
-    // are ignored anyway.
-    if (cv.hasOwnProperty('XRP') && tx.address === argv.account) {
-      cv.XRP = cv.XRP.plus(BigNumber(tx.outcome.fee))
-      if (cv.XRP.eq(0)) {
-        delete cv.XRP;
-      }
-    }
-    var currencies = Object.keys(cv)
-    if (currencies.length > 2) {
-      throw 'More than 2 currencies'
-    }
-    if (!cv.hasOwnProperty(symbol)) {
-      return;
-    }
-    var source = 'XRPL';
-    var action;
-    // Use USD as default currency.
-    var currency = 'USD';
-    var price = undefined;
-    if (currencies.length === 1) {
-      if (cv[symbol].isGreaterThan(0)) {
-        action = 'Receive';
-      } else {
-        action = 'Send';
-      }
-      source = getFundSource(action, tx.outcome.timestamp,
-        action === 'Receive' ?
-        tx.specification.source.address :
-        tx.specification.destination.address)
-    } else {  // currencies.length === 2
-      if (cv[symbol].isGreaterThan(0)) {
-        action = 'Buy';
-      } else {
-        action = 'Sell';
-      }
-      currencies.forEach(function(c) {
-        if (c !== symbol) {
-          currency = c
-          price = cv[c].dividedBy(cv[symbol]).negated();
-        }
-      });
-    }
-    if (cv[symbol].isLessThan(0)) {
-      cv[symbol] = cv[symbol].negated();
-    }
-    lines.push(new Line(
-      tx.outcome.timestamp,
-      source,
-      action,
-      symbol,
-      cv[symbol],
-      currency,
-      price,
-      '0',  // Fee. Ignore it.
-      'XRP'))
+transactions.forEach(function(tx, i) {
+  if (!tx.outcome.balanceChanges.hasOwnProperty(argv.account)) {
+    // This happens when unfunded order of 'account' is cancelled.
+    return;
   }
+  // currency to value map.
+  var cv = {};
+  var balances = tx.outcome.balanceChanges[argv.account]
+  balances.forEach(function(b) {
+    // Same currency can appear twice in balances.
+    if (cv.hasOwnProperty(b.currency)) {
+      cv[b.currency] = cv[b.currency].plus(BigNumber(b.value));
+    } else {
+      cv[b.currency] = BigNumber(b.value);
+    }
+  });
+  // Exclude fee from XRP balance changes. Fee will be shown separately.
+  if (cv.hasOwnProperty('XRP') && tx.address === argv.account) {
+    cv.XRP = cv.XRP.plus(BigNumber(tx.outcome.fee))
+    if (cv.XRP.eq(0)) {
+      delete cv.XRP;
+    }
+  }
+  var currencies = Object.keys(cv)
+  if (currencies.length > 2) {
+    throw 'More than 2 currencies'
+  }
+  var source = 'XRPL';
+  var action;
+  var volume = cv.hasOwnProperty(symbol) ? cv[symbol].abs() : BigNumber(0);
+  // Use USD as default currency.
+  var currency = 'USD';
+  var price;
+  if (volume.eq(0)) { // This is not a symbol trade or non-trade transaction.
+    if (symbol === 'XRP') {
+      action = 'FEE';
+      lines.push(new Line(
+        tx.outcome.timestamp, source, action, symbol, volume, currency, price,
+        tx.outcome.fee, 'XRP')
+      );
+    }
+    return;
+  }
+  if (currencies.length === 1) {
+    action = cv[symbol].isGreaterThan(0) ? 'RECEIVE' : 'SEND';
+    source = getFundSource(action, tx.outcome.timestamp,
+      action === 'RECEIVE' ?
+      tx.specification.source.address :
+      tx.specification.destination.address)
+  } else {  // currencies.length === 2
+    action = cv[symbol].isGreaterThan(0) ? 'BUY' : 'SELL';
+    delete cv[symbol];
+    currency = Object.keys(cv)[0]
+    price = cv[currency].dividedBy(volume).abs();
+  }
+  lines.push(new Line(
+    tx.outcome.timestamp, source, action, symbol, volume, currency, price,
+    tx.outcome.fee, 'XRP')
+  );
 });
 
 lines.sort(function(a, b) {

@@ -28,10 +28,10 @@ class Line {
     var action = row['Sub Type']
     if (!action) {
       if (source.match(/[Dd]eposit/)) {
-        action = 'Receive'
+        action = 'RECEIVE'
       } else if (source.match(/[Ww]ithdraw/) ||
                  source.match(/[Pp]ayment/)) {
-        action = 'Send'
+        action = 'SEND'
       }
     }
     var volume, symbol;
@@ -58,7 +58,7 @@ class Line {
   static fromPoloniex(row) {
     var date = new Date([row.Date, 'UTC'].join(' '));
     var source = row.Category;
-    var action = row.Type;
+    var action = row.Type.toUpperCase();
     var symbol, currency;
     [symbol, currency] = row.Market.split('/');
     if (currency === 'USDT') {
@@ -76,7 +76,7 @@ class Line {
   static fromPoloniexDeposit(row) {
     var date = new Date([row.Date, 'UTC'].join(' '));
     var source = 'XRPL';
-    var action = 'Receive';
+    var action = 'RECEIVE';
     var symbol = row.Currency;
     var volume = row.Amount;
     var currency, price, fee, feeCurrency;
@@ -88,7 +88,7 @@ class Line {
   static fromPoloniexWithdraw(row) {
     var date = new Date([row.Date, 'UTC'].join(' '));
     var source = 'XRPL';
-    var action = 'Send';
+    var action = 'SEND';
     var symbol = row.Currency;
     var volume = row.Amount;
     var currency, price, fee, feeCurrency;
