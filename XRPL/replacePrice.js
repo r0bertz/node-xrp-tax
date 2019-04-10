@@ -2,7 +2,7 @@
 // Gift.
 
 const fs = require('fs');
-const Line = require('./line.js');
+const Line = require('../line.js');
 const csv = require('csv')
 const argv = require('yargs')
   .option('input', {
