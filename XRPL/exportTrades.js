@@ -90,16 +90,17 @@ transactions.forEach(function(tx, i) {
   }
   var source = 'XRPL';
   var action;
-  var volume = cv.hasOwnProperty(symbol) ? cv[symbol].abs() : BigNumber(0);
-  // Use USD as default currency.
   var currency = 'USD';
   var price;
-  if (volume.eq(0)) { // This is not a symbol trade or non-trade transaction.
-    if (symbol === 'XRP') {
+  var volume = cv.hasOwnProperty(symbol) ? cv[symbol].abs() : BigNumber(0);
+  var fee = tx.address === argv.account ? tx.outcome.fee : '0';
+  if (volume.eq(0)) {
+    // This is not a symbol trade or not a trade transaction at all.
+    if (symbol === 'XRP' && fee !== '0') {
       action = 'FEE';
       lines.push(new Line(
         tx.outcome.timestamp, source, action, symbol, volume, currency, price,
-        tx.outcome.fee, 'XRP')
+        fee, 'XRP')
       );
     }
     return;
@@ -118,7 +119,7 @@ transactions.forEach(function(tx, i) {
   }
   lines.push(new Line(
     tx.outcome.timestamp, source, action, symbol, volume, currency, price,
-    tx.outcome.fee, 'XRP')
+    fee, 'XRP')
   );
 });
 
