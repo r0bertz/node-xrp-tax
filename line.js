@@ -25,7 +25,7 @@ class Line {
   static fromBitstamp(row) {
     var date = new Date([row.Datetime, 'UTC'].join(' '));
     var source = row.Type;
-    var action = row['Sub Type']
+    var action = row['Sub Type'].toUpperCase();
     if (!action) {
       if (source.match(/[Dd]eposit/)) {
         action = 'RECEIVE'
@@ -40,15 +40,16 @@ class Line {
     if (symbol !== 'XRP') {
       return;
     }
-    var totalPrice, currency;
-    [totalPrice, currency] = row.Value.split(' ');
-    var fee = 0, feeCurrency = 'USD';
+    var totalPrice = 0, currency = 'USD', fee = 0, feeCurrency = 'USD';
+    if (row.Value) {
+      [totalPrice, currency] = row.Value.split(' ');
+    }
     if (row.Fee) {
       [fee, feeCurrency] = row.Fee.split(' ');
     }
     totalPrice = BigNumber(totalPrice).minus(fee)
     var price = totalPrice.dividedBy(volume);
-    fee = 0 // Reset fee
+    fee = 0 // Reset fee. Fee deducted from totalPrice.
     return new Line(date, source, action, symbol, volume, currency, price, fee, feeCurrency);
   }
 
@@ -59,7 +60,7 @@ class Line {
     var date = new Date([row.Date, 'UTC'].join(' '));
     var source = row.Category;
     var action = row.Type.toUpperCase();
-    var symbol, currency;
+    var symbol, currency = 'USD';
     [symbol, currency] = row.Market.split('/');
     if (currency === 'USDT') {
       currency = 'USD';
@@ -79,7 +80,7 @@ class Line {
     var action = 'RECEIVE';
     var symbol = row.Currency;
     var volume = row.Amount;
-    var currency, price, fee, feeCurrency;
+    var currency = 'USD', price = 0, fee = 0, feeCurrency = 'USD';
     return new Line(date, source, action, symbol, volume, currency, price, fee, feeCurrency);
   }
 
@@ -91,7 +92,7 @@ class Line {
     var action = 'SEND';
     var symbol = row.Currency;
     var volume = row.Amount;
-    var currency, price, fee, feeCurrency;
+    var currency = 'USD', price = 0, fee = 0, feeCurrency = 'USD';
     return new Line(date, source, action, symbol, volume, currency, price, fee, feeCurrency);
   }
 
