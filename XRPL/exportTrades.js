@@ -91,7 +91,7 @@ transactions.forEach(function(tx, i) {
   var source = 'XRPL';
   var action;
   var currency = 'USD';
-  var price;
+  var price = 0;
   var volume = cv.hasOwnProperty(symbol) ? cv[symbol].abs() : BigNumber(0);
   var fee = tx.address === argv.account ? tx.outcome.fee : '0';
   if (volume.eq(0)) {
