@@ -107,10 +107,17 @@ transactions.forEach(function(tx, i) {
   }
   if (currencies.length === 1) {
     action = cv[symbol].isGreaterThan(0) ? 'RECEIVE' : 'SEND';
-    source = getFundSource(action, tx.outcome.timestamp,
-      action === 'RECEIVE' ?
-      tx.specification.source.address :
-      tx.specification.destination.address)
+    switch (tx.type) {
+      case 'payment':
+        source = getFundSource(action, tx.outcome.timestamp,
+          action === 'RECEIVE' ?
+          tx.specification.source.address :
+          tx.specification.destination.address);
+        break;
+      case 'paymentChannelClaim':
+        source = 'RECEIVE';
+        break;
+    }
   } else {  // currencies.length === 2
     action = cv[symbol].isGreaterThan(0) ? 'BUY' : 'SELL';
     delete cv[symbol];
@@ -123,8 +130,20 @@ transactions.forEach(function(tx, i) {
   );
 });
 
+function strcmp(a, b) {
+  return a < b ? 1 : a > b ? -1 : 0;
+}
+
 lines.sort(function(a, b) {
-  return a.date - b.date;
+  var diff = a.date - b.date;
+  if (diff !== 0) {
+    return diff;
+  }
+  diff = strcmp(a.action, b.action)
+  if (diff !== 0) {
+    return diff;
+  }
+  return a.volume.lt(b.volume);
 });
 
 console.log(Line.header());
