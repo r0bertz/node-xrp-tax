@@ -48,7 +48,7 @@ class Line {
       [fee, feeCurrency] = row.Fee.split(' ');
     }
     totalPrice = BigNumber(totalPrice).minus(fee)
-    var price = totalPrice.dividedBy(volume);
+    var price = !totalPrice.eq(0) ? totalPrice.dividedBy(volume) : 0;
     fee = 0 // Reset fee. Fee deducted from totalPrice.
     return new Line(date, source, action, symbol, volume, currency, price, fee, feeCurrency);
   }
