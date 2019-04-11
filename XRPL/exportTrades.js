@@ -146,8 +146,6 @@ lines.sort(function(a, b) {
   return a.volume.lt(b.volume);
 });
 
-console.log(Line.header());
-
 lines.forEach(function(l) {
   console.log(l.toString());
 })
