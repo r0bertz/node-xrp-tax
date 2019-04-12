@@ -27,6 +27,10 @@ const argv = require('yargs')
     //   * Gift: Use market price on that day.
     //   * Name of an exchange: Use the price when bought on exchange.
   })
+  .option('ignore_later_than', {
+    describe: 'ISO date string. Ignore transactions later than this date.'
+  })
+  .coerce('ignore_later_than', (arg) => new Date(arg))
   .help()
   .strict()
   .argv
@@ -62,6 +66,10 @@ function getFundSource(action, timestamp, address) {
 var lines = []
 
 transactions.forEach(function(tx, i) {
+  var date = new Date(tx.outcome.timestamp);
+  if (date > argv.ignore_later_than) {
+    return;
+  }
   if (!tx.outcome.balanceChanges.hasOwnProperty(argv.account)) {
     // This happens when unfunded order of 'account' is cancelled.
     return;
