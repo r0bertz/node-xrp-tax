@@ -9,10 +9,10 @@ class Line {
     this.source = source;
     this.action = action;
     this.symbol = symbol;
-    this.volume = volume;
+    this.volume = BigNumber(volume);
     this.currency = currency;
     this.price = price;
-    this.fee = fee;
+    this.fee = BigNumber(fee);
     this.feeCurrency = feeCurrency;
   }
 
@@ -118,6 +118,30 @@ class Line {
       this.price + ',' +
       this.fee + ',' +
       this.feeCurrency;
+  }
+
+  direction() {
+    switch (this.action) {
+      case 'SEND':
+      case 'FEE':
+      case 'SELL':
+        return -1;
+        break;
+      case 'RECEIVE':
+      case 'BUY':
+        return 1;
+        break;
+      default:
+        throw 'unknown action';
+    }
+  }
+
+  canMerge(line) {
+    return this.direction() != line.direction();
+  }
+
+  merge(line) {
+    this.volume = this.volume.minus(line.volume).minus(line.fee.times(this.direction()));
   }
 }
 
