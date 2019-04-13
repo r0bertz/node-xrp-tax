@@ -140,8 +140,22 @@ class Line {
     return this.direction() != line.direction();
   }
 
+  mergeFee() {
+    if (this.fee.eq(0)) {
+      return
+    }
+    if (this.fee.lt(0)) {
+      throw 'negative fee'
+    }
+    if (this.feeCurrency !== 'XRP') {
+      throw 'fee is not in XRP'
+    }
+    this.volume = this.volume.minus(this.fee.times(this.direction()));
+    this.fee = 0
+  }
+
   merge(line) {
-    this.volume = this.volume.minus(line.volume).minus(line.fee.times(this.direction()));
+    this.volume = this.volume.minus(line.volume)
   }
 }
 
