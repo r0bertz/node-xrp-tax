@@ -36,6 +36,9 @@ fs.createReadStream(argv.input)
       if (lines[n].volume.eq(0) && lines[n].fee.eq(0)) {
         continue;
       }
+      if (lines[n].action === 'SEND' && lines[n].volume.eq(0)) {
+        lines[n].action = 'FEE';
+      }
       console.log(lines[n].toString());
     }
     console.log(lines[i].toString());
