@@ -27,12 +27,15 @@ fs.createReadStream(argv.input)
     var i = 0;
     while (i < lines.length-1) {
       let n = i;
-      if (lines[i].action === 'SEND' && lines[i+1].action === 'RECEIVE' &&
-          lines[i].volume.gte(lines[i+1].volume)) {
-        lines[i].merge(lines[i+1]);
+      if (lines[n].action === 'SEND' && lines[n+1].action === 'RECEIVE' &&
+          lines[n].volume.gte(lines[n+1].volume)) {
+        lines[n].merge(lines[n+1]);
         i += 1;
       }
       i += 1
+      if (lines[n].volume.eq(0) && lines[n].fee.eq(0)) {
+        continue;
+      }
       console.log(lines[n].toString());
     }
     console.log(lines[i].toString());
