@@ -22,7 +22,7 @@ const argv = require('yargs')
   .strict()
   .argv
 
-lines = []
+symbols = {}
 
 fs.createReadStream(argv.input)
   .pipe(csv.parse())
@@ -32,6 +32,10 @@ fs.createReadStream(argv.input)
     }
     let l = new Line(...row);
     l.mergeFee()
+    if (!symbols.hasOwnProperty(l.symbol)) {
+      symbols[l.symbol] = [];
+    }
+    let lines = symbols[l.symbol];
     if (lines.length == 0) {
       lines.push(l);
       return;
@@ -45,12 +49,14 @@ fs.createReadStream(argv.input)
       return;
     }
     var sales = [];
-    while (l.volume.gte(last.volume)) {
+    while (last && l.volume.gte(last.volume)) {
       sales.push(l.merge(last));
       lines.pop();
       last = lines[lines.length-1]
     }
-    sales.push(last.merge(l));
+    if (last) {
+      sales.push(last.merge(l));
+    }
     if (argv.year && l.date.getUTCFullYear() !== argv.year) {
       return;
     }
