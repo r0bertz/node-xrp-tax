@@ -11,11 +11,15 @@ const argv = require('yargs')
     describe: 'The path of the input file'
   })
   .option('year', {
-    describe: 'export sales for this year only',
+    describe: 'Export sales for this year only',
     type: 'integer'
   })
+  .option('source', {
+    describe: 'Export sales for this source only',
+    type: 'string'
+  })
   .option('easytxf', {
-    describe: 'if true, export in easytxf.com format',
+    describe: 'If true, export in easytxf.com format',
     type: 'boolean'
   })
   .help()
@@ -56,6 +60,9 @@ fs.createReadStream(argv.input)
     }
     if (last) {
       sales.push(last.merge(l));
+    }
+    if (argv.source && l.source !== argv.source) {
+      return;
     }
     if (argv.year && l.date.getUTCFullYear() !== argv.year) {
       return;
