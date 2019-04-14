@@ -11,7 +11,11 @@ const argv = require('yargs')
     describe: 'The path of the input file'
   })
   .option('year', {
-    describe: 'export sales for this year only',
+    describe: 'export sales for this year only'
+  })
+  .option('easytxf', {
+    describe: 'if true, export in easytxf.com format',
+    type: 'boolean'
   })
   .help()
   .strict()
@@ -39,29 +43,39 @@ fs.createReadStream(argv.input)
       lines.push(l);
       return;
     }
-    var ol = _.cloneDeep(l);
-    var buyOrders = [];
+    var sales = [];
     while (l.volume.gte(last.volume)) {
-      l.merge(last);
-      buyOrders.push(lines.pop());
+      sales.push(l.merge(last));
+      lines.pop();
       last = lines[lines.length-1]
     }
-    last.merge(l);
-    l.action = 'BUY';
-    l.price = last.price;
-    buyOrders.push(l);
-    var cost = BigNumber(0);
-    buyOrders.forEach(o => {
-      cost = cost.plus(o.volume.times(o.price));
-    });
-    var proceeds = ol.volume.times(ol.price);
-    var gains = proceeds.minus(cost);
-    if (proceeds.eq(0)) {
+    sales.push(last.merge(l));
+    if (l.date.getUTCFullYear() !== argv.year) {
       return;
     }
-    if (ol.date.getUTCFullYear() !== argv.year) {
-      return;
+    while (sales.length > 0) {
+      let t = sales.pop();
+      if (t.profit.toFixed(2) === '0.00' ||
+          t.profit.toFixed(2) === '-0.00') {
+        continue;
+      }
+      if (argv.easytxf) {
+        console.log(t.symbol + ',' +
+          t.volume.toFixed(6) + ',' +
+          t.openingDate + ',' +
+          t.cost.toFixed(2) + ',' +
+          t.closingDate + ',' +
+          t.proceeds.toFixed(2)
+        );
+      } else {
+        console.log(t.symbol,
+          t.volume.toFixed(6),
+          t.openingDate,
+          t.cost.toFixed(2),
+          t.closingDate,
+          t.proceeds.toFixed(2),
+          t.profit.toFixed(2)
+        );
+      }
     }
-    console.log(ol.date.toISOString(), ol.volume.toFixed(6),
-      proceeds.toFixed(2), cost.toFixed(2), gains.toFixed(2));
   })

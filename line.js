@@ -22,7 +22,7 @@ class Line {
 
   // Type,Datetime,Account,Amount,Value,Rate,Fee,Sub Type
   // Market,"Apr. 05, 2017, 04:14 AM",Main Account,752.42380800 XRP,29.34 USD,0.03899 USD,,Sell
-  static fromBitstamp(row) {
+  static fromBitstamp(row, symbolOnly ) {
     var date = new Date([row.Datetime, 'UTC'].join(' '));
     var source = row.Type;
     var action = row['Sub Type'].toUpperCase();
@@ -36,8 +36,7 @@ class Line {
     }
     var volume, symbol;
     [volume, symbol] = row.Amount.split(' ');
-    // TODO(r0bertz): support other currencies.
-    if (symbol !== 'XRP') {
+    if (symbol !== symbolOnly) {
       return;
     }
     var totalPrice = 0, currency = 'USD', fee = 0, feeCurrency = 'USD';
@@ -154,8 +153,37 @@ class Line {
     this.fee = 0
   }
 
+  static formatDate(date) {
+    var month = date.getUTCMonth() + 1
+    var day = date.getUTCDate() + 1
+    return month + '/' + day + '/' + date.getUTCFullYear();
+  }
+
   merge(line) {
+    if (this.symbol !== line.symbol) {
+      throw 'different symbols'
+    }
+    if (this.currency != line.currency) {
+      throw 'different currencies'
+    }
     this.volume = this.volume.minus(line.volume)
+    let rv = {
+      symbol: line.symbol,
+      volume: line.volume,
+    };
+    if (this.direction() > 0) {
+      rv.openingDate = Line.formatDate(this.date);
+      rv.cost =  rv.volume.times(this.price);
+      rv.closingDate = Line.formatDate(line.date);
+      rv.proceeds = rv.volume.times(line.price);
+    } else {
+      rv.openingDate = Line.formatDate(line.date);
+      rv.cost =  rv.volume.times(line.price);
+      rv.closingDate = Line.formatDate(this.date);
+      rv.proceeds = rv.volume.times(this.price);
+    }
+    rv.profit = rv.proceeds.minus(rv.cost);
+    return rv;
   }
 }
 
