@@ -10,8 +10,8 @@ const argv = require('yargs')
     demandOption: true,
     describe: 'The path of the input file'
   })
-  .option('ignore_later_than', {
-    describe: 'ISO date string. Ignore transactions later than this date.'
+  .option('year', {
+    describe: 'export sales that happened in this year only',
   })
   .coerce('ignore_later_than', (arg) => new Date(arg))
   .help()
@@ -33,9 +33,6 @@ fs.createReadStream(argv.input)
       return;
     }
     let l = new Line(...row);
-    if (l.date > argv.ignore_later_than) {
-      return;
-    }
     l.mergeFee()
     if (lines.length == 0) {
       lines.push(l);
@@ -67,6 +64,9 @@ fs.createReadStream(argv.input)
     });
     var closingNA = closing.volume.times(closing.price);
     if (closingNA.eq(0)) {
+      return;
+    }
+    if (closing.date.getUTCFullYear() !== argv.year) {
       return;
     }
     console.log('XRP,' +
