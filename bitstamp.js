@@ -6,6 +6,10 @@ const argv = require('yargs')
     demandOption: true,
     describe: 'The path of the input file'
   })
+  .option('symbol', {
+    describe: 'Export transactions for this symbol only',
+    default: 'XRP'
+  })
   .help()
   .strict()
   .argv
@@ -16,7 +20,7 @@ fs.createReadStream(argv.input)
     if (row === null) {
       return;
     }
-    line = Line.fromBitstamp(row)
+    line = Line.fromBitstamp(row, argv.symbol)
     if (!line) {
       return;
     }
