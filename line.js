@@ -154,8 +154,8 @@ class Line {
   }
 
   static formatDate(date) {
-    var month = date.getUTCMonth() + 1
-    var day = date.getUTCDate() + 1
+    var month = date.getUTCMonth() + 1;
+    var day = date.getUTCDate();
     return month + '/' + day + '/' + date.getUTCFullYear();
   }
 

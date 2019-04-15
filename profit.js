@@ -18,16 +18,25 @@ const argv = require('yargs')
     describe: 'Export sales for this source only',
     type: 'string'
   })
+  .option('exclude_source', {
+    describe: 'Exclude sales for this source only',
+    type: 'string'
+  })
   .option('easytxf', {
     describe: 'If true, export in easytxf.com format',
     type: 'boolean'
   })
+  .option('combine', {
+    describe: 'If true, combine sales for the same symbol, bought and sold in the same day',
+    type: 'boolean'
+  })
+  .conflicts('source', 'exclude_source')
   .help()
   .strict()
   .argv
 
-symbols = {}
-
+output = [];
+symbols = {};
 fs.createReadStream(argv.input)
   .pipe(csv.parse())
   .on('data', (row) => {
@@ -64,6 +73,9 @@ fs.createReadStream(argv.input)
     if (argv.source && l.source !== argv.source) {
       return;
     }
+    if (argv.exclude_source && l.source === argv.exclude_source) {
+      return;
+    }
     if (argv.year && l.date.getUTCFullYear() !== argv.year) {
       return;
     }
@@ -73,6 +85,23 @@ fs.createReadStream(argv.input)
           t.profit.toFixed(2) === '-0.00') {
         continue;
       }
+      let lastT = output[output.length-1]
+      if (argv.combine &&lastT &&
+          t.symbol === lastT.symbol &&
+          t.openingDate === lastT.openingDate &&
+          t.closingDate === lastT.closingDate
+      ) {
+        lastT.volume = lastT.volume.plus(t.volume);
+        lastT.cost = lastT.cost.plus(t.cost);
+        lastT.proceeds = lastT.proceeds.plus(t.proceeds);
+        lastT.profit = lastT.proceeds.minus(lastT.cost);
+      } else {
+        output.push(t);
+      }
+    }
+  })
+  .on('end', () => {
+    output.forEach(t => {
       if (argv.easytxf) {
         console.log(t.symbol + ',' +
           t.volume.toFixed(6) + ',' +
@@ -91,5 +120,5 @@ fs.createReadStream(argv.input)
           t.profit.toFixed(2)
         );
       }
-    }
-  })
+    });
+  });
