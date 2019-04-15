@@ -27,16 +27,16 @@ function isGift(source) {
 }
 
 fs.createReadStream(argv.input)
-  .pipe(csv.parse({columns: true}))
+  .pipe(csv.parse())
   .on('data', (row) => {
     if (row === null) {
       return;
     }
     // Find out the price in USD if this is gift or if the currency is not USD.
-    if (isGift(row.Source) || row.Currency !== 'USD') {
-      let d = row.Date
+    if (isGift(row[1]) || row[5] !== 'USD') {
+      let date = row[0];
       promises.push(new Promise(function(resolve, reject) {
-        resolve([d, undefined]);
+        resolve([date, undefined]);
       }));
     }
   })

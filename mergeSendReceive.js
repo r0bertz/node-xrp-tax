@@ -27,7 +27,8 @@ fs.createReadStream(argv.input)
     var i = 0;
     while (i < lines.length-1) {
       let n = i;
-      if (lines[n].action === 'SEND' && lines[n+1].action === 'RECEIVE' &&
+      if ((lines[n].action === 'SEND' && lines[n+1].action === 'RECEIVE' ||
+           lines[n].action === 'RECEIVE' && lines[n+1].action === 'SEND') &&
           lines[n].volume.gte(lines[n+1].volume)) {
         lines[n].merge(lines[n+1]);
         i += 1;
