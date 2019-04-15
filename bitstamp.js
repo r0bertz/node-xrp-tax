@@ -8,7 +8,17 @@ const argv = require('yargs')
   })
   .option('symbol', {
     describe: 'Export transactions for this symbol only',
-    default: 'XRP'
+  })
+  .option('exclude_symbol', {
+    describe: 'Exclude transactions for this symbol',
+    type: 'array'
+  })
+  .check((args, options) => {
+    if ((typeof args.symbol === 'undefined') ===
+        (typeof args.exclude_symbol === 'undefined')) {
+      throw 'must define exactly one of --symbol and --exclude_symbol'
+    }
+    return true;
   })
   .help()
   .strict()
@@ -20,7 +30,7 @@ fs.createReadStream(argv.input)
     if (row === null) {
       return;
     }
-    line = Line.fromBitstamp(row, argv.symbol)
+    line = Line.fromBitstamp(row, argv.symbol, argv.exclude_symbol)
     if (!line) {
       return;
     }

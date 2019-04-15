@@ -22,7 +22,10 @@ class Line {
 
   // Type,Datetime,Account,Amount,Value,Rate,Fee,Sub Type
   // Market,"Apr. 05, 2017, 04:14 AM",Main Account,752.42380800 XRP,29.34 USD,0.03899 USD,,Sell
-  static fromBitstamp(row, symbolOnly ) {
+  static fromBitstamp(row, onlySymbol='', excludeSymbols=[]) {
+    if ((onlySymbol === '') === (excludeSymbols.length === 0)) {
+      throw 'must set exactly one of onlySymbol and excludeSymbol'
+    }
     var date = new Date([row.Datetime, 'UTC'].join(' '));
     var source = row.Type;
     var action = row['Sub Type'].toUpperCase();
@@ -36,7 +39,10 @@ class Line {
     }
     var volume, symbol;
     [volume, symbol] = row.Amount.split(' ');
-    if (symbol !== symbolOnly) {
+    if (onlySymbol && symbol !== onlySymbol) {
+      return;
+    }
+    if (excludeSymbols.length > 0 && excludeSymbols.includes(symbol)) {
       return;
     }
     var totalPrice = 0, currency = 'USD', fee = 0, feeCurrency = 'USD';
