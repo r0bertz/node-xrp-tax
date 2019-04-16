@@ -70,6 +70,9 @@ fs.createReadStream(argv.input)
     if (last) {
       sales.push(last.merge(l));
     }
+    if (l.action !== 'SELL') {
+      return;
+    }
     if (argv.source && l.source !== argv.source) {
       return;
     }
@@ -111,12 +114,12 @@ fs.createReadStream(argv.input)
           t.proceeds.toFixed(2)
         );
       } else {
-        console.log(t.symbol,
-          t.volume.toFixed(6),
-          t.openingDate,
-          t.cost.toFixed(2),
-          t.closingDate,
-          t.proceeds.toFixed(2),
+        console.log(t.symbol + ',' +
+          t.volume.toFixed(6) + ',' +
+          t.openingDate + ',' +
+          t.cost.toFixed(2) + ',' +
+          t.closingDate + ',' +
+          t.proceeds.toFixed(2) + ',' +
           t.profit.toFixed(2)
         );
       }
