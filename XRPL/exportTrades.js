@@ -14,18 +14,16 @@ const argv = require('yargs')
     describe: 'The path of the input file'
   })
   .option('addresses', {
-    describe: 'The path of a file which maps from address to name'
+    describe: 'The path of a file which maps from addresses to names'
   })
   .option('cost_basis_hint', {
-    describe: 'The path of a file which maps from address name to symblic name which helps to determine cost basis'
-    // It only applies to incoming fund.
-    // Valid values are:
-    //   * Self: Fund originates from this account. Use the original price when
-    //           bought on this account. The account after comma is the receiver
-    //           of the fund when it was sent out. Otherwise, the sender was the
-    //           receiver.
-    //   * Gift: Use market price on that day.
-    //   * Name of an exchange: Use the price when bought on exchange.
+    describe: 'The path of a file which maps from address name to a hint for ' +
+    'cost basis. There is only one valid value for the hint which is "Gift" ' +
+    'meaning the market price will be used as the cost basis. The "Source" ' +
+    'column of an incoming fund will be replaced with this hint followed by ' +
+    'an colon and the address name. The key of the map can have an optional ' +
+    'timestamp (in form of "name:ts") which means the hint will be applied ' +
+    'to the fund coming from the name at that timestamp only.'
   })
   .option('ignore_later_than', {
     describe: 'ISO date string. Ignore transactions later than this date.'
