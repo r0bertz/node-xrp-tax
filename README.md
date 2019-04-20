@@ -62,7 +62,7 @@ poloniex/tradeHistory.csv
 poloniex/withdrawalHistory.csv
 ```
 
-The following command will give you a file that can uploaded to easytxf.com.
+The following commands will generate a file that can uploaded to easytxf.com.
 ```bash
 node XRPL/getTransactions.js --account $ACCOUNT --output transactions.json
 node XRPL/exportTrades.js --account $ACCOUNT --input transactions.json --addresses addresses.json --cost_basis_hint hint.json  > xrpl.csv
@@ -84,11 +84,12 @@ node profit.js --input xrp.csv --year 2018 --combine --easytxf > easytxf.csv
 ```
 
 Upload the last file to easytxf.com to get a txf file `XRP.txf`. easytxf.com
-assumes the cost basis is either short-term covered or long-term covered. You
-need to change short-term covered (321) to short-term not reported (712) and
-changes long-term covered (323) to long-term not reported (714) with:
+assumes the cost basis is either short-term covered or long-term covered. It
+needs to be changed with:
 
-```
+```bash
+# Change short-term covered (321) to short-term not reported (712)
+# Change long-term covered (323) to long-term not reported (714)
 sed -i -e 's/N321/N712/' -e 's/N323/N714/' XRP.txf
 ```
 
