@@ -7,7 +7,7 @@ const Line = require('../line.js');
 const argv = require('yargs')
   .option('account', {
     demandOption: true,
-    describe: 'The account to get transactions for'
+    describe: 'The account to export trade transactions for'
   })
   .option('input', {
     demandOption: true,

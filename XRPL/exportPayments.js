@@ -3,7 +3,7 @@ const fs = require('fs');
 const argv = require('yargs')
   .option('account', {
     demandOption: true,
-    describe: 'The account to get transactions for'
+    describe: 'The account to export payment transactions for'
   })
   .option('input', {
     demandOption: true,
