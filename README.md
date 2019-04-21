@@ -1,7 +1,7 @@
 # XRP Tax
 
 This is a collection of scripts to prepare tax for crpyto (not necessarily XRP)
-sales. A majority of this project deals with XRP Ledger, so it is called "XRP
+sales. The majority of this project deals with XRP Ledger, so it is called "XRP
 Tax".  The end product is a csv file that can be uploaded to
 http://www.easytxf.com.
 
