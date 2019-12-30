@@ -69,7 +69,7 @@ node XRPL/exportTrades.js --account $ACCOUNT --input transactions.json --address
 # Find out the timestamp for all trades if it is a Gift or if Currency is not USD.
 node XRPL/extractPricePoint.js --input xrpl.csv > usd.json
 # Fill usd.json with XRP price in USD. Some requests may fail due to rate-limiting. Retry as needed.
-node fillPricePoint.js --input usd.json
+node XRPL/fillPricePoint.js --input usd.json
 # Replace price with price in USD if Currency is not USD.
 node XRPL/replacePrice.js --input xrpl.csv --price_file usd.json > xrpl_usd.csv
 node bitstamp.js --symbol XRP --input bitstamp/Transactions.csv > bitstamp.csv
