@@ -35,6 +35,11 @@ class Line {
       } else if (source.match(/[Ww]ithdraw/) ||
                  source.match(/[Pp]ayment/)) {
         action = 'SEND'
+      } else if (source == 'Sub Account Transfer') {
+        // ignore 'Sub Account Tranfer'.
+        return;
+      } else {
+        throw new Error(`No sub type and unknown type: ${source}`);
       }
     }
     var volume, symbol;
@@ -137,7 +142,7 @@ class Line {
         return 1;
         break;
       default:
-        throw 'unknown action';
+        throw new Error(`unknown action: "${this.action}"`);
     }
   }
 

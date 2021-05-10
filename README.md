@@ -67,7 +67,7 @@ The following commands will generate a file that can uploaded to easytxf.com.
 node XRPL/getTransactions.js --account $ACCOUNT --output transactions.json
 node XRPL/exportTrades.js --account $ACCOUNT --input transactions.json --addresses addresses.json --cost_basis_hint hint.json  > xrpl.csv
 # Find out the timestamp for all trades if it is a Gift or if Currency is not USD.
-node XRPL/extractPricePoint.js --input xrpl.csv > usd.json
+node XRPL/extractPricePoint.js --input xrpl.csv --output usd.json
 # Fill usd.json with XRP price in USD. Some requests may fail due to rate-limiting. Retry as needed.
 node XRPL/fillPricePoint.js --input usd.json
 # Replace price with price in USD if Currency is not USD.

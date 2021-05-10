@@ -22,21 +22,28 @@ function DelayPromise(delay) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
       resolve();
-    }, 1000 * delay);
+    }, 1500 * delay);
   });
 }
 
 var promises = []
 var counter = 0;
 var pricePoints = JSON.parse(fs.readFileSync(argv.input, 'utf8'));
-pricePoints.forEach(p => {
-  let d = p[0];
-  let price = p[1];
+
+process.on('SIGINT', () => {
+  console.info('SIGINT signal received.');
+  fs.writeFile(argv.input, JSON.stringify(pricePoints, null, 2), function(err) {
+    if(err) {
+      return console.log(err);
+    }
+    console.log("The file was saved!");
+    process.exit();
+  })
+});
+
+for (const [d, price] of Object.entries(pricePoints)) {
   if (price) {
-    promises.push(new Promise(function(resolve, reject) {
-      resolve([d, price]);
-    }));
-    return;
+    continue;
   }
 
   let url = 'https://data.ripple.com/v2/exchange_rates/'
@@ -49,16 +56,16 @@ pricePoints.forEach(p => {
     .then(json => {
       console.log(d, json);
       if (json.result === 'success') {
-        return [d, json.rate];
+        pricePoints[d] = json.rate;
       }
-      return [d, undefined]
+      return;
     })
   );
   counter++;
-});
+};
 
-Promise.all(promises).then(values => {
-  fs.writeFile(argv.input, JSON.stringify(values, null, 2), function(err) {
+Promise.all(promises).then(_ => {
+  fs.writeFile(argv.input, JSON.stringify(pricePoints, null, 2), function(err) {
     if(err) {
       return console.log(err);
     }

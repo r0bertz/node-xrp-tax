@@ -22,7 +22,7 @@ function isGift(source) {
   return hint === 'Gift';
 }
 
-var m = new Map(JSON.parse(fs.readFileSync(argv.price_file, 'utf8')));
+var m = JSON.parse(fs.readFileSync(argv.price_file, 'utf8'));
 
 fs.createReadStream(argv.input)
   .pipe(csv.parse())
@@ -34,7 +34,7 @@ fs.createReadStream(argv.input)
     line = new Line(...row);
     if (isGift(line.source) || line.currency !== 'USD') {
       line.currency = 'USD';
-      line.price = m.get(row[0]);
+      line.price = m[row[0]];
     }
     return line.toString() + '\n';
   }))
