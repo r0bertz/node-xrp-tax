@@ -88,9 +88,11 @@ assumes the cost basis is either short-term covered or long-term covered. It
 needs to be changed with:
 
 ```bash
-# Change short-term covered (321) to short-term not reported (712)
-# Change long-term covered (323) to long-term not reported (714)
-sed -i -e 's/N321/N712/' -e 's/N323/N714/' XRP.txf
+# Change short-term covered (321) to short-term noncovered (711)
+# Change long-term covered (323) to long-term noncovered (713)
+# They should have been short-term not reported (712) and long-term not reported (714)
+# respectively. But somehow TurboTax (as of 2020) doesn't recognized them.
+sed -i -e 's/N321/N711/' -e 's/N323/N713/' XRP.txf
 ```
 
 <b id="f1">1</b> The format doesn't really matter. I used to use [bitcoin.tax](
